@@ -1,0 +1,52 @@
+- hosts: all
+  pre_tasks:
+
+  - name: update repo index for Ubuntu and CentOs
+    tags: always
+    package:
+      update_cache: yes
+    
+  - name: install latets version of apache and git for Ubuntu and centos slaves
+    tags: apache,ubuntu,centos
+    package:
+      name:
+         - "{{ apache_package_name }}"
+         - "{{ git_package_name }}"
+      state: latest
+      
+  - name: Clone Github Repository and save on a temporary local directory on all slaves
+    tags: git,clone
+    git:
+       repo: "{{ github_repo_url }}"
+       dest: "{{ tmp_path }}"
+       version: main
+       update: yes
+
+  - name: Empty apache webserver launch directory
+    tags: empty,clone
+    shell: rm -rf "{{ clearable_path }}"
+
+  - name: copy files from temporay local directory to apache webserver launch directory
+    tags: copy,clone
+    copy:
+        src: "{{ tmp_src_path }}"
+        dest: "{{ dest_path }}"
+        remote_src: true
+        owner: root
+        group: root
+        mode: 0755
+
+  - name: Clear temporary local directory on all slaves
+    tags: clear,clone
+    file:
+        path: "{{ tmp_path }}"
+        state: absent
+
+ #The next set of tasks is to  start and enable apache. This task is particular for the centos slave as it doesn't auto restart apache but for the sake of uniformity, I'll carry out the play on the ubuntu slave as well.
+  - name: start and enable apache for CentOS and Ubuntu
+    tags: enable,started,apache
+    service:
+         name: "{{ apache_service_name }}"
+         state: started
+         enabled: yes
+

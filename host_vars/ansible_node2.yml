@@ -1,0 +1,9 @@
+apache_package_name: httpd
+apache_service_name: httpd
+git_package_name: git
+github_repo_url: https://github.com/busybrainx99/Assignment-1.git 
+tmp_path: /tmp/clone_repo
+tmp_src_path: /tmp/clone_repo/
+dest_path: /var/www/html
+clearable_path: /var/www/html/*
+
